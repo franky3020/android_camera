@@ -1,18 +1,18 @@
 package com.example.everyday_selfimg;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.Settings;
-import android.view.View;
+
+import java.io.File;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 public class OpenCamera extends PhoneCommand {
     AppCompatActivity app;
+    File cameraSaveFile = null;
+
     public OpenCamera(AppCompatActivity app){
         this.app = app;
     }
@@ -23,22 +23,20 @@ public class OpenCamera extends PhoneCommand {
     }
 
 
-    public void startCamera (){
-        if(!isLocationPermissionGranted()){
-            openAppSettingsIntent();
-        }
+    public void startCamera () {
+
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        this.app.startActivity(intent);
+        cameraSaveFile = new File(Environment.getExternalStorageDirectory(),"imageTmp.jpg");
+
+        Uri outputFileUri = Uri.fromFile(cameraSaveFile);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+
+        this.app.startActivityForResult(intent, 0);
+
+    }
+    public String getFilePath() {
+        return cameraSaveFile.getPath();
     }
 
-    private boolean isLocationPermissionGranted() {
-        return ContextCompat.checkSelfPermission(this.app, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void openAppSettingsIntent() {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", this.app.getPackageName(), null));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        this.app.startActivity(intent);
-    }
 }
 
